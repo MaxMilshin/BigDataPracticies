@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestHandlers(t *testing.T) {
@@ -25,12 +26,17 @@ func TestHandlers(t *testing.T) {
 	}{
 		{"GET before any POST requests", http.MethodGet, "/get", getHandlerFunc, "", "", 200},
 		{"POST request", http.MethodPost, "/replace", replaceHandlerFunc, "sample data for testing purpose", "", 200},
-		{"GET after POST request", http.MethodGet, "/get", getHandlerFunc, "", "sample data for testing purpose", 200},
+		{"GET immediately after POST request", http.MethodGet, "/get", getHandlerFunc, "", "", 200},
+		{"GET in minute after POST request", http.MethodGet, "/get", getHandlerFunc, "", "sample data for testing purpose", 200},
 		{"one more POST request", http.MethodPost, "/replace", replaceHandlerFunc, "complicated sample data for testing purpose", "", 200},
-		{"one more GET after last POST request", http.MethodGet, "/get", getHandlerFunc, "", "complicated sample data for testing purpose", 200},
+		{"one more GET immediately after last POST request", http.MethodGet, "/get", getHandlerFunc, "", "sample data for testing purpose", 200},
+		{"one more GET in minute after last POST request", http.MethodGet, "/get", getHandlerFunc, "", "complicated sample data for testing purpose", 200},
 	}
 	go transactionManager.startTransactionManager()
-	for _, testItem := range testItems {
+	for i, testItem := range testItems {
+		if i == 3 || i == 6 {
+			time.Sleep(timeInterval)	
+		}
 		t.Run(testItem.description, func(t *testing.T) {
 			request := httptest.NewRequest(testItem.method, testItem.route, bytes.NewReader([]byte(testItem.inputData)))
 			responseRecorder := httptest.NewRecorder()

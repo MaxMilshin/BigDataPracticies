@@ -9,6 +9,8 @@ var lastTransaction string
 var journal []string
 var snapshot string
 
+const timeInterval = 60 * time.Second
+
 type TransactionManager struct {
 	transactions chan string
 	mutex        sync.Mutex
@@ -16,7 +18,7 @@ type TransactionManager struct {
 }
 
 func getTransactionManager() TransactionManager {
-	return TransactionManager{transactions: make(chan string), timer: time.NewTicker(time.Minute)}
+	return TransactionManager{transactions: make(chan string), timer: time.NewTicker(timeInterval)}
 }
 
 func (manager *TransactionManager) startTransactionManager() {
@@ -34,12 +36,6 @@ func (manager *TransactionManager) startTransactionManager() {
 				manager.mutex.Unlock()
 		}
 	}
-}
-
-func (manager *TransactionManager) getLast() string {
-	manager.mutex.Lock()
-	defer manager.mutex.Unlock()
-	return lastTransaction
 }
 
 func (manager *TransactionManager) pushTransaction(transaction string) {

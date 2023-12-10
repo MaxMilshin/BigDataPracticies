@@ -19,8 +19,7 @@ func replaceHandler(transactionManager *TransactionManager) http.HandlerFunc {
 
 func getHandler(transactionManager *TransactionManager) http.HandlerFunc {
 	return func(writer http.ResponseWriter, _ *http.Request) {
-		value := transactionManager.getLast()
-		_, error := writer.Write([]byte(value))
+		_, error := writer.Write([]byte(snapshot))
 		if error != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
